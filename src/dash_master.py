@@ -1,9 +1,11 @@
 import subprocess
+from src.xml_master import MakerMPD
 
 
 
 class ReadyVideoConfiguration:
     def __init__(self):
+        self.path = None
         self.data = None
         self.qualities = []
         self.speed = 4
@@ -30,6 +32,8 @@ class ReadyVideoConfiguration:
         self.qualities_calculation()
 
         print(self.qualities)
+
+        self.path = f'{global_path}/converted/series_{data['index']}'
 
         for quality in self.qualities:
             if quality['access']:
@@ -98,6 +102,9 @@ class ReadyVideoConfiguration:
                 'ffmpeg',
                 '-i', f'{input}',
                 '-map', f'0:a:{x}',  # Выбираем аудиопоток по индексу x
+
+
+                '-ac', '2',  # Устанавливаем количество аудиоканалов
                 '-codec', 'aac',     # Кодек аудио (можно изменить на нужный)
 
                 '-sn',  # без субтитров
@@ -110,9 +117,13 @@ class ReadyVideoConfiguration:
                 # '-dash_segment_type', 'mp4',
                 f"{global_path}/converted/series_{data['index']}/audio/{name}/output.mpd"
             ]
-            
+
+                        
             
             try:
                 subprocess.run(cmd, check=True, text=True) # capture_output=True
             except subprocess.CalledProcessError as e:
                 print(f"Ошибка FFmpeg: {e.stderr}")
+
+        mpd = MakerMPD(self.path)
+        mpd.main_control()

@@ -5,10 +5,10 @@ from pathlib import Path
 from src.control import start_converted
 
 
-start_message = 'Github разработчика: https://github.com/Lis-tik/dash-hls-_creator \n' \
+start_message = 'Github разработчика: https://github.com/Lis-tik \n' \
 'Данная программа создана для комфортного перекодирования медиа контента под dash (hls). База - ffmpeg\n\n' \
 'Перед началом работы программы, зполните файл конфигурации (config.txt) по шаблону\n' \
-'Либо выберете режим manual для ручного заполнения\n'
+'Либо выберете режим Create для ручного заполнения\n'
 
 print(start_message)
 
