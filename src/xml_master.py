@@ -101,7 +101,6 @@ class MakerMPD:
                 adaptation_set.tail = '\n        '
 
             Represen = adaptation_set.find(".//{*}Representation")
-            Represen.set("id", f"{name}")  # Меняем ID
 
             base_url = etree.SubElement(Represen, "BaseURL")
             base_url.text = f"audio/{name}/"  # Пример URL, можно изменить
