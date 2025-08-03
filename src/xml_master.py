@@ -29,30 +29,36 @@ class MakerMPD:
             'xlink': "http://www.w3.org/1999/xlink"
         }
 
-        root = etree.parse(f"{self.global_path}/video/360p/video.mpd")
-        mpd = root.find(".//{*}MPD")
+        mpd_path = f"{self.global_path}/video/360p/video.mpd"
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree = etree.parse(mpd_path, parser)
+
+        mpd = tree.getroot()
+
+        mpd_attrs = dict(mpd.attrib)  # Копируем все атрибуты
         
-        mpd.text = '\n    '  # Добавляем пустую строку
+        # 3. Очищаем содержимое MPD, но сохраняем атрибуты
+        mpd.clear()
+        for attr, value in mpd_attrs.items():
+            mpd.set(attr, value)  # Восстанавливаем атрибуты
+            
 
-        tree = etree.ElementTree(mpd)
+        mpd.text = '\n    '  # Добавляем отступ
 
+        # 4. Создаем структуру MPD
         period = etree.SubElement(mpd, "Period", start="PT0S")
-        period.text = "\n       "     # Отступ для AdaptationSet
-        period.tail = "\n"  # Отступ после BaseURL
+        period.text = "\n        "
+        period.tail = "\n    "
 
+        adaptation_set = etree.SubElement(period, "AdaptationSet")
+        adaptation_set.text = "\n            "
+        adaptation_set.tail = "\n        "
 
-        base_url = etree.SubElement(period, "AdaptationSet")
-        base_url.tail = '\n    '
+        # Добавляем атрибуты из self.first_AdaptationSet
+        for key, value in self.first_AdaptationSet.items():
+            adaptation_set.set(key, value)
 
-        for key in list(self.first_AdaptationSet):
-            base_url.set(key, self.first_AdaptationSet[key])
-        base_url.text = '\n            '
-        base_url.tail = '\n        '
-
-
-
-
-        # Записываем в файл с форматированием
+        # 5. Сохраняем новый MPD
         tree.write(
             f"{self.global_path}/master.mpd",
             pretty_print=True,
@@ -148,5 +154,10 @@ if __name__ == '__main__':
     # C:/Admin/project/Python/dash-hls-_creator/mpd_test/test00
     print('Укажите директорию с dash проектом')
     lam = input(':')
-    debugStart = MakerMPD(global_path=lam)
-    debugStart.main_control()
+
+    files_w = [f for f in os.listdir(lam)]
+
+    for x in files_w:
+        path = f'{lam}/{x}'
+        debugStart = MakerMPD(global_path=path)
+        debugStart.main_control()
