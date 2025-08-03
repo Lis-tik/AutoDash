@@ -28,26 +28,11 @@ class MakerMPD:
             None: "urn:mpeg:dash:schema:mpd:2011",  # Основное пространство имен (по умолчанию)
             'xlink': "http://www.w3.org/1999/xlink"
         }
-        
-        # Создаем корневой элемент MPD с помощью etree.Element (не E-factory)
-        mpd = etree.Element(
-            "{urn:mpeg:dash:schema:mpd:2011}MPD",
-            nsmap=NSMAP,
-            profiles="urn:mpeg:dash:profile:isoff-live:2011",
-            type="static",
-            mediaPresentationDuration="PT25M36.0S",
-            maxSegmentDuration="PT2.0S",
-            minBufferTime="PT20.0S"
-        )
-        
-        # Добавляем атрибут schemaLocation из пространства имен xsi
-        mpd.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation",
-            "urn:mpeg:DASH:schema:MPD:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd")
-        
 
+        root = etree.parse(f"{self.global_path}/video/360p/video.mpd")
+        mpd = root.find(".//{*}MPD")
+        
         mpd.text = '\n    '  # Добавляем пустую строку
-
-
 
         tree = etree.ElementTree(mpd)
 

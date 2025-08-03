@@ -62,13 +62,13 @@ class Main:
 
 
     def start(self):
-        mode = int(input('1. Create\n2. Editing\n3. Exit\n:'))
+        mode = int(input('1. Create\n2. Editing \n3. Start\n4. Exit\n:'))
         if mode == 1:
             print('Включен режим создания dash проекта')
             self.manual_mode()
-        elif mode == 2:
+        elif mode == 3:
             print('Включен режим редактирования готового dash проекта')
-
+            start_converted()
 
 
     def manual_mode(self):

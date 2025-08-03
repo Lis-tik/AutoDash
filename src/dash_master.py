@@ -69,14 +69,16 @@ class ReadyVideoConfiguration:
             option = data['subtitle'][x]
             name = option['title']
             if option['path']:
+                chanel_const = 0
                 input = data['subtitle'][x]['path']
             else:
+                chanel_const = x
                 input = data['name']
 
             cmd = [
                 'ffmpeg',
                 '-i', f'{input}',
-                '-map', f'0:s:{x}',  # Первый поток субтитров
+                '-map', f'0:s:{chanel_const}',  # Первый поток субтитров
                 '-codec', 'ass',  # Явно указываем кодек ASS
                 '-f', 'ass',       # Формат выходного файла
                 f'{global_path}/converted/series_{data['index']}/subtitle/{name}.ass'
@@ -94,14 +96,16 @@ class ReadyVideoConfiguration:
             option = data['audio'][x]
             name = option['title']
             if option['path']:
+                chanel_const = 0
                 input = data['audio'][x]['path']
             else:
+                chanel_const = x
                 input = data['name']
 
             cmd = [
                 'ffmpeg',
                 '-i', f'{input}',
-                '-map', f'0:a:{x}',  # Выбираем аудиопоток по индексу x
+                '-map', f'0:a:{chanel_const}',  # Выбираем аудиопоток по индексу x
 
 
                 '-ac', '2',  # Устанавливаем количество аудиоканалов

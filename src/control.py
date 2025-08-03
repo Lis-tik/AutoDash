@@ -29,5 +29,7 @@ def start_converted():
             video_coder.start(x, y)
 
 
+if __name__ == '__main__':
+    start_converted()
 # start_converted()
 
