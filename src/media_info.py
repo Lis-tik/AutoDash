@@ -27,9 +27,13 @@ class Info():
         print('Вы в режиме редактирования\nНажмите [ENTER] для выхода')
         mode = int(input('Выберете номер медиа, которое хотите редактировать\nВведите (-1), чтобы выбрать ВСЕ медия\n:'))
         correct = input('Внесите корректировки\n\nФормат: тип данных в медиа/номер дорожки/параметр/новое значение\nПример: audio/0/title/new_name\n:').split('/')
+
         if mode == -1:
             for x in range(len(self.info_main_lib[self.global_path])):
-                self.info_main_lib[self.global_path][x][correct[0]][int(correct[1])][correct[2]] = correct[3]
+                if correct[2]:
+                    self.info_main_lib[self.global_path][x][correct[0]][int(correct[1])][correct[2]] = correct[3]
+                else:
+                    del self.info_main_lib[self.global_path][x][correct[0]][int(correct[1])]
         else:
             self.info_main_lib[self.global_path][mode][correct[0]][int(correct[1])][correct[2]] = correct[3]
                 
@@ -60,6 +64,7 @@ class Info():
                 if stream['codec_type'] == 'video':
                     video_data_add = self.video_info(stream)
                     self.conteg['video'].append(video_data_add)
+                        
 
                 if stream['codec_type'] == 'audio':
                     audio_data_add = self.audio_info(stream)
@@ -106,9 +111,20 @@ class Info():
                 summary_message += f'{y['width']}x{y['height']}; pix_fmt: {y['pix_fmt']}'
 
             summary_message += '\naudio: \n'
+
+            
+            index = {}
             for z in range(len(pth['audio'])):
                 cont = pth['audio'][z]
-                summary_message += f'--{z}. title: {cont['title']}; language: {cont['language']}; codec_name: {cont['codec_name']}; channels: {cont['channels']}; path: {cont['path']}\n'
+
+                if cont['path'] in index:
+                    index[cont['path']] += 1
+                else:
+                    index[cont['path']] = 0
+
+                cont['index'] = index[cont['path']]
+
+                summary_message += f'--{z}. title: {cont['title']}; language: {cont['language']}; channel number: {cont['index']}; codec_name: {cont['codec_name']}; channels: {cont['channels']}; path: {cont['path']}\n'
 
             summary_message += 'subtitle: \n'
             for j in range(len(pth['subtitle'])):

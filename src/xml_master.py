@@ -105,6 +105,7 @@ class MakerMPD:
         qualities_list.sort(reverse=True)
 
         for index, name in enumerate(qualities_list):
+            # print(f"{self.global_path}/video/{name}p/video.mpd")
             tree = etree.parse(f"{self.global_path}/video/{name}p/video.mpd")
             root = tree.getroot()
             

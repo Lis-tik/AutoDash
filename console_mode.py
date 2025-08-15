@@ -3,7 +3,7 @@ import threading
 from src.media_info import Info
 from pathlib import Path
 from src.control import start_converted
-
+import re
 
 start_message = 'Github разработчика: https://github.com/Lis-tik \n' \
 'Данная программа создана для комфортного перекодирования медиа контента под dash (hls). База - ffmpeg\n\n' \
@@ -34,7 +34,9 @@ class Main:
                     file.write('{'+f'"{str(self.global_path).replace("\\", '/')}": [' + '\n')
 
                     for data in self.main_data[self.global_path][:-1]:
-                        file.write(str(data).replace("'", '"') + ',' + '\n')
+                        data['name'] = str(data['name']).replace("'", '>')
+                        file.write(str(data).replace("'", '"').replace(">", "'") + ',' + '\n')
+
                     file.write(str(self.main_data[self.global_path][-1]).replace("'", '"') + '\n')
                     file.write(']}')
                 break
