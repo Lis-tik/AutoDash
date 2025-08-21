@@ -81,6 +81,7 @@ class Main:
 
         info_main_video = Info()
         info_main_video.start_getinfo(self.container_files, self.global_path)
+        print(self.container_files)
         self.main_data = info_main_video.info_main_lib
 
         # for value in self.main_data:
