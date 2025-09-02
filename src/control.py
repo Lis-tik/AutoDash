@@ -26,8 +26,7 @@ def start_converted():
     video_coder = ReadyVideoConfiguration()
     for x in queue_list[0]:
         for y in queue_list[0][x]:
-            if y['index'] == 5:
-                video_coder.start(x, y)
+            video_coder.start(x, y)
 
 
 if __name__ == '__main__':

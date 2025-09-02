@@ -17,7 +17,7 @@ def main(page_control: ft.Page):
 
 
     async def mainApp():
-        while True:
+        while True: 
             if app_state.transition:
                 await control()
                 page_control.title = app_state.page.title

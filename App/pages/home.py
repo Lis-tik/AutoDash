@@ -14,13 +14,28 @@ class ContentButton(ft.ElevatedButton):
         self.style = ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=1))
 
 
+def text_currected(data, name):   
+    Text = (f"{name}\n\nДетали:\nНомер в сборнике: №{data['index']}\nПолный путь: {data['name']}\n\n Данные видодорожек:\n")
+
+    for video in data['video']:
+        Text += f'Разрешение сторон: {video['width']}x{video['height']}\nФормат цветопередачи: {video['pix_fmt']}\nПрофиль: {video['profile']}\n\n'
+
+    Text += '\n\nДанные аудиодорожек:\n'
+    for audio in data['audio']:
+        Text += f'Индекс: {audio['index']}\nОписание (имя): {audio['title']}\nЯзык: {audio['language']}\nКодек: {audio['codec_name']}\nКоличество каналов: {audio['channels']}\nБитрейт: {audio['bit_rate']}\n\n'
+        
+    return Text
+
+
 def get_data_file(name):
     temp = app_state._mediainfo.info_main_lib[app_state.global_path]
     for index, value in enumerate(temp):
         if name in value['name']:
-            app_state.transition = True
-            info_text_ref.current.value = f"Детали:\n{value}"
+            info_text_ref.current.value = text_currected(value, name)
+            info_text_ref.current.update()
             break
+    
+
 
 
 
@@ -68,7 +83,7 @@ def get_home_page():
                     # Правый блок - список файлов
                     ft.Container(
                         content=ft.Column(
-                            controls=[ContentButton(f, on_click=lambda e: get_data_file(f)) for f in app_state.files],
+                            controls=[ContentButton(f, on_click=lambda e, file=f: get_data_file(file)) for f in app_state.files],
                             spacing=10,
                             scroll=ft.ScrollMode.AUTO,
                         ),

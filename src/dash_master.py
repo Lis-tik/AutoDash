@@ -8,14 +8,14 @@ class ReadyVideoConfiguration:
         self.path = None
         self.data = None
         self.qualities = []
-        self.speed = 'veryslow'
+        self.speed = 'slow'
         # self.speed = 4
         self.segment_time = 5
         
 
     def qualities_calculation(self):
         self.qualities = [
-            # {'access': 0, 'name': '2160p', 'width': 3840, 'height': 2160, 'vf': 'scale=-2:2160', 'b:v': '35000k', 'crf': '15'},
+            {'access': 0, 'name': '2160p', 'width': 3840, 'height': 2160, 'vf': 'scale=-2:2160', 'b:v': '35000k', 'crf': '15'},
             {'access': 0, 'name': '1440p', 'width': 2560, 'height': 1440, 'vf': 'scale=-2:1440', 'b:v': '12000k', 'crf': '17'},
             {'access': 0, 'name': '1080p', 'width': 1920, 'height': 1080, 'vf': 'scale=-2:1080', 'b:v': '8000k', 'crf': '19'},
             {'access': 0, 'name': '720p', 'width': 1280, 'height': 720, 'vf': 'scale=-2:720', 'b:v': '5000k', 'crf': '24'},
@@ -26,6 +26,8 @@ class ReadyVideoConfiguration:
         for read_q in self.qualities:
             if int(self.data['video'][0]['height']) >= int(read_q['height']):
                 read_q['access'] = 1
+
+        
 
         
 
@@ -41,26 +43,33 @@ class ReadyVideoConfiguration:
             if quality['access']:
                 cmd = [
                     'ffmpeg',
-                    '-i', f"{data['name']}",                # Входной файл
-                    '-map', '0:v:0',                         # Берём только первый видеопоток
-                    '-c:v', 'libx264',                       # Кодек x264
-                    '-preset', str(self.speed),               # Скорость/качество (ultrafast...veryslow)
-                    '-crf', str(quality['crf']),               # Качество (CRF для x264)
-                    '-pix_fmt', str(data['video'][-1]['pix_fmt']),  # Формат пикселей
+                    '-hwaccel', 'cuda',
+                    '-hwaccel_output_format', 'cuda',
 
-                    '-dn', '-an', '-sn',                      # Игнорируем данные, аудио и субтитры
-                    '-f', 'dash',                             # Формат вывода (DASH)
+                    '-i', f"{data['name']}",
 
-                    '-seg_duration', str(self.segment_time),  # Длительность сегментов
-                    '-use_timeline', '1',                     # Включить временную шкалу
-                    '-init_seg_name', 'init.mp4',             # Инициализационный сегмент
-                    '-media_seg_name', 'segment_$Number%05d$.m4s',  # Видеосегменты
+                    '-map', '0:v:0',
+                    '-c:v', 'hevc_nvenc',
+                    '-preset', str(self.speed),
+                    '-profile:v', 'main10',
+                    '-pix_fmt', 'p010le',
+                    '-cq', str(quality['crf']),
 
-                    '-g', '240',                              # GOP size
-                    '-tune', 'film',                          # Настройка под фильм
-                    '-vf', f"{quality['vf']}:flags=lanczos",  # Фильтр видео
-                    f"{global_path}/converted/series_{data['index']}/video/{quality['name']}/video.mpd"  # Выходной файл
+                    '-dn', '-an', '-sn',
+                    '-f', 'dash',
+                    '-seg_duration', str(self.segment_time),
+                    '-use_timeline', '1',
+                    '-init_seg_name', 'init.mp4',
+                    '-media_seg_name', 'segment_$Number%05d$.m4s',
+
+                    '-g', '240',
+                    '-vf', f'scale_cuda={quality['width']}:{quality['height']}:format=p010,hwdownload,format=p010le',
+                    f"{global_path}/converted/series_{data['index']}/video/{quality['name']}/video.mpd"
                 ]
+
+
+
+
 
 
 
