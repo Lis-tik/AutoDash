@@ -10,6 +10,8 @@ class AppState:
         self.global_path = None
         self._transition = False
         self.project_name = "Мой проект"
+        self.audio_formats = ['.mkv', '.mka', 'mp4']
+        self.subtitles_formats = ['.srt', '.ass', '.vtt', '.sub', '.ttml', '.pgs']
 
 
         self._mediainfo = Info()
