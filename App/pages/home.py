@@ -50,13 +50,15 @@ def text_currected(data, name):
 
     Text = 'Данные субтитров:\n'
     for subtitle in data['subtitle']:
-        Text += f'писание (имя): {subtitle['title']}\nЯзык: {subtitle['language']}\nФормат: {subtitle['format']}'
+        Text += f'Описание (имя): {subtitle['title']}\nЯзык: {subtitle['language']}\nФормат: {subtitle['format']}'
         if int(subtitle['path']):
             Text += f'\nПуть к директории: {subtitle['path']}'
         Text += '\n\n'
 
     info_subtitle_ref.current.value = Text
-    
+
+
+
 
 
 def get_data_file(name):
@@ -74,96 +76,100 @@ info_subtitle_ref = ft.Ref[ft.Text]()
 data_ref = [info_video_ref, info_audio_ref, info_subtitle_ref]
 
 
+def Label():
+    return ft.Container(
+        content=ft.Text("ABR Maker", size=30, weight='bold'),
+        padding=5,
+    )
+     
+def navigation():
+    return ft.Row(  # Лучше адаптируется для мобильных устройств
+        controls=[
+            ft.ElevatedButton(
+                "Главная",
+                on_click=lambda e: app_state.new_page(rout.multipage(1)),
+            ),
+            ft.ElevatedButton(
+                "Конвертер", 
+                on_click=lambda e: app_state.new_page(rout.multipage(2)),
+            ),
+            ft.ElevatedButton(
+                "Манифест",
+                on_click=lambda e: app_state.new_page(rout.multipage(3)),
+            ),
+            ft.ElevatedButton(
+                "Запуск",
+                on_click=lambda e: app_state.new_page(rout.multipage(4)),
+            ),
+        ],
+        spacing=10,
+        run_spacing=10,  # Перенос на новую строку при нехватке места
+    )
+
+def Information():
+    return ft.Row(
+        controls=[                    
+            # Правый блок - список файлов
+            ft.Column(
+                controls = [
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[ContentButton(f, on_click=lambda e, file=f: get_data_file(file)) for f in app_state.files],
+                            spacing=10,
+                            scroll=ft.ScrollMode.AUTO,
+                        ),
+                        expand=True,  # Занимает вторую половину ширины Row
+                        border=ft.border.all(1, ft.Colors.GREY_400),
+                        border_radius=10,
+                        padding=10,
+                        margin=ft.margin.symmetric(vertical=10),
+                    ),
+                ]
+            ),
+            
+            # Левый блок - информационная панель
+            ft.Container(
+                content=ft.Column([
+                    ft.Row(   # кнопки сверху
+                        [
+                            ft.ElevatedButton("Изменить метаданные", on_click=lambda e: None),
+                            ft.ElevatedButton("Добавить аудиодорожку", on_click=lambda e: open_directory_dialog('audio')),
+                            ft.ElevatedButton("Добавить субтитры", on_click=lambda e: open_directory_dialog('subtitle'))
+                        ],
+                        alignment="start",
+                    ),
+                    ft.Text("Информация", size=20, weight="bold"),
+                    ft.Divider(height=1),
+                    ft.Text(ref=info_video_ref, size=16),
+                    ft.Divider(height=1),
+                    ft.Text(ref=info_audio_ref, size=16),
+                    ft.Divider(height=1),
+                    ft.Text(ref=info_subtitle_ref, size=16)
+                ],
+                scroll=ft.ScrollMode.AUTO,
+                ),
+                padding=20,
+                bgcolor=ft.Colors.BLUE_GREY_50,
+                border_radius=15,
+                shadow=ft.BoxShadow(blur_radius=2),
+                # margin=ft.margin.symmetric(vertical=10),
+                expand=True,  # Занимает половину ширины Row
+            ),
+        ],
+        expand=True,  # Row растягивается на всю доступную ширину
+        spacing=10,   # Расстояние между блоками
+        vertical_alignment=ft.CrossAxisAlignment.START  # ← Ключевой параметр!
+    )
+
+
+
 def get_home_page():
     return ft.Column(
         controls=[
-            # Заголовок
-            ft.Container(
-                content=ft.Text("ABR Maker", size=30, weight='bold'),
-                padding=5,
-            ),
-            
-            # Навигационная панель
-            ft.Row(  # Лучше адаптируется для мобильных устройств
-                controls=[
-                    ft.ElevatedButton(
-                        "Главная",
-                        on_click=lambda e: app_state.new_page(rout.multipage(1)),
-                    ),
-                    ft.ElevatedButton(
-                        "Конвертер", 
-                        on_click=lambda e: app_state.new_page(rout.multipage(2)),
-                    ),
-                    ft.ElevatedButton(
-                        "Манифест",
-                        on_click=lambda e: app_state.new_page(rout.multipage(3)),
-                    ),
-                    ft.ElevatedButton(
-                        "Запуск",
-                        on_click=lambda e: app_state.new_page(rout.multipage(4)),
-                    ),
-                ],
-                spacing=10,
-                run_spacing=10,  # Перенос на новую строку при нехватке места
-            ),
-            
-            # Информационная панель (занимает 100% ширины)
-            ft.Row(
-                controls=[                    
-                    # Правый блок - список файлов
-                    ft.Column(
-                        controls = [
-                            ft.ElevatedButton("Режим изменения для ВСЕХ МЕДИАФАЙЛОВ", on_click=lambda e: None),
-                            ft.Container(
-                                content=ft.Column(
-                                    controls=[ContentButton(f, on_click=lambda e, file=f: get_data_file(file)) for f in app_state.files],
-                                    spacing=10,
-                                    scroll=ft.ScrollMode.AUTO,
-                                ),
-                                expand=True,  # Занимает вторую половину ширины Row
-                                border=ft.border.all(1, ft.Colors.GREY_400),
-                                border_radius=10,
-                                padding=10,
-                                margin=ft.margin.symmetric(vertical=10),
-                            ),
-                        ]
-                    ),
-                    
-                    # Левый блок - информационная панель
-                    ft.Container(
-                        content=ft.Column([
-                            ft.Row(   # кнопки сверху
-                                [
-                                    ft.ElevatedButton("Изменить метаданные", on_click=lambda e: None),
-                                    ft.ElevatedButton("Добавить аудиодорожку", on_click=lambda e: open_directory_dialog('audio')),
-                                    ft.ElevatedButton("Добавить субтитры", on_click=lambda e: open_directory_dialog('subtitle'))
-                                ],
-                                alignment="start",
-                            ),
-                            ft.Text("Информация", size=20, weight="bold"),
-                            ft.Divider(height=1),
-                            ft.Text(ref=info_video_ref, size=16),
-                            ft.Divider(height=1),
-                            ft.Text(ref=info_audio_ref, size=16),
-                            ft.Divider(height=1),
-                            ft.Text(ref=info_subtitle_ref, size=16)
-                        ],
-                        scroll=ft.ScrollMode.AUTO,
-                        ),
-                        padding=20,
-                        bgcolor=ft.Colors.BLUE_GREY_50,
-                        border_radius=15,
-                        shadow=ft.BoxShadow(blur_radius=2),
-                        # margin=ft.margin.symmetric(vertical=10),
-                        expand=True,  # Занимает половину ширины Row
-                    ),
-                ],
-                expand=True,  # Row растягивается на всю доступную ширину
-                spacing=10,   # Расстояние между блоками
-                vertical_alignment=ft.CrossAxisAlignment.START  # ← Ключевой параметр!
-            )
+            Label(),
+            navigation(),
+            Information(),
         ],
         expand=True,
         spacing=20,
-        # scroll=ft.ScrollMode.AUTO,  # Основная прокрутка страницы
     )
