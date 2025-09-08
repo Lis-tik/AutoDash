@@ -13,6 +13,8 @@ class AppState:
         self.audio_formats = ['.mkv', '.mka', 'mp4']
         self.subtitles_formats = ['.srt', '.ass', '.vtt', '.sub', '.ttml', '.pgs']
 
+        self.activeFileHome = None
+
 
         self._mediainfo = Info()
 

@@ -12,20 +12,18 @@ class ContentButton(ft.ElevatedButton):
         self.text = text
         self.on_click = on_click
 
-        self.active = False
+        self.active = True if app_state.activeFileHome == text else False
         self.style = ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=1))
+
+
 
 
 class HomePageClasster:
     def __init__(self):
         self.data = app_state._mediainfo.info_main_lib[app_state.global_path]
-        self.activeFile = None
         self.newData = None
-
-        self.info_video_ref = []
-        self.info_audio_ref = []
-        self.info_subtitle_ref = ft.Ref[ft.Text]()
-        self.data_ref = [self.info_audio_ref] #, self.info_audio_ref, self.info_subtitle_ref]
+        self.filesMain = [ContentButton(f, on_click=lambda e, file=f: self.get_data_file(file)) for f in app_state.files]
+        self.info_page = []
 
 
     def data_currected(self, active):
@@ -34,31 +32,8 @@ class HomePageClasster:
 
 
     def get_data_file(self, name):
-        self.activeFile = name
-        for value in self.data:
-            if self.activeFile in value['name']:
-                # Audio
-                for audio in value['audio']:
-
-                    audio_title_ref = ft.Ref[ft.TextField]()
-
-                    audio_field = ft.TextField(
-                        ref=audio_title_ref,  # Привязываем ref к полю
-                        hint_text="Введите имя аудиодорожки",
-                        value=audio['title'],  # Устанавливаем значение здесь
-                        width=300
-                    )                
-                    self.info_audio_ref.append(ft.Text("Имя (описание): ", size=15))
-                    self.info_audio_ref.append(audio_title_ref)
-                
-
-
-
-            for refData in self.info_audio_ref:
-                refData.current.update()
-            break
-                
-
+        app_state.activeFileHome = name
+        app_state.new_page(rout.Page_Home)
 
 
     def open_directory_dialog(self, mode):
@@ -82,7 +57,7 @@ class HomePageClasster:
                     controls = [
                         ft.Container(
                             content=ft.Column(
-                                controls=[ContentButton(f, on_click=lambda e, file=f: self.get_data_file(file)) for f in app_state.files],
+                                controls=self.filesMain,
                                 spacing=10,
                                 scroll=ft.ScrollMode.AUTO,
                             ),
@@ -125,13 +100,27 @@ class HomePageClasster:
         )
     
     def distributionData(self):
-        if not self.activeFile:
+        if not app_state.activeFileHome:
             return ft.Container(
                 content=ft.Row([ft.Text("Выберете файл для просмотра информации", size=15)])
             )
+        
+        for value in self.data:
+            if app_state.activeFileHome in value['name']:
+                for audio in value['audio']:
+                    
+                    textField = ft.Row([
+                        ft.Text("Описание (имя) аудиодорожки:", size=15),
+                        ft.TextField(
+                            hint_text="Введите имя аудиодорожки",
+                            value=audio['title'],  # Устанавливаем значение здесь
+                            width=300
+                        )
+                    ])
+                    self.info_page.append(textField)
 
         return ft.Container(
-            content=ft.Row(self.info_audio_ref)
+            content=ft.Column(self.info_page)
         )
 
 
