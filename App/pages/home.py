@@ -6,34 +6,47 @@ import os
 
 
 
-class ContentButton(ft.ElevatedButton):
-    def __init__(self, text, on_click):
+class ContentCheckbox(ft.Checkbox):
+    def __init__(self, text):
+        super().__init__()
+        self.label = text
+        self.on_change = self.get_data_file
+        self.value = False
+        
+    def get_data_file(self, e):
+        app_state.activeFilesHome.append(self.label) 
+        app_state.new_page(rout.Page_Home)
+        
+
+class ModeButton(ft.ElevatedButton):
+    def __init__(self, text, mode):
         super().__init__()
         self.text = text
-        self.on_click = on_click
+        self.mode = mode
+        self.on_click = self.infoModeTool
 
-        self.active = True if app_state.activeFileHome == text else False
-        self.style = ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=1))
+        self.active = True if app_state.infoMode == self.mode else False
 
+        self.style = ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=1),
+            bgcolor=(ft.Colors.GREY_300 if self.active else ft.Colors.WHITE)
+            )
+    
 
+    def infoModeTool(self, e):
+        app_state.infoMode = self.mode
+        app_state.new_page(rout.Page_Home)
+        
+    
 
 
 class HomePageClasster:
     def __init__(self):
         self.data = app_state._mediainfo.info_main_lib[app_state.global_path]
-        self.newData = None
-        self.filesMain = [ContentButton(f, on_click=lambda e, file=f: self.get_data_file(file)) for f in app_state.files]
-        self.info_page = []
+        self.filesMain = [ContentCheckbox(f) for f in app_state.files]
+        self.filesMain.insert(0, ft.ElevatedButton("Выборочный режим",on_click=lambda e: None))
 
 
-    def data_currected(self, active):
-        return
-            
-
-
-    def get_data_file(self, name):
-        app_state.activeFileHome = name
-        app_state.new_page(rout.Page_Home)
 
 
     def open_directory_dialog(self, mode):
@@ -79,15 +92,16 @@ class HomePageClasster:
     def metaData(self):
         return ft.Container(
             content=ft.Column([
+                ft.Text(f"{app_state.activeFilesHome if app_state.activeFilesHome else 'Информация'}", size=20, weight="bold"),
+                ft.Divider(height=1),
                 ft.Row(   # кнопки сверху
                     [
-                        ft.ElevatedButton("Добавить аудиодорожку", on_click=lambda e: self.open_directory_dialog('audio')),
-                        ft.ElevatedButton("Добавить субтитры", on_click=lambda e: self.open_directory_dialog('subtitle'))
+                        ModeButton("Видео", 'video'),
+                        ModeButton("Аудио", 'audio'),
+                        ModeButton("Субтитры", 'subtitle')
                     ],
                     alignment="start",
                 ),
-                ft.Text("Информация", size=20, weight="bold"),
-                ft.Divider(height=1),
                 self.distributionData()
             ],
             scroll=ft.ScrollMode.AUTO,
@@ -100,27 +114,103 @@ class HomePageClasster:
         )
     
     def distributionData(self):
-        if not app_state.activeFileHome:
+        if not app_state.activeFilesHome:
             return ft.Container(
                 content=ft.Row([ft.Text("Выберете файл для просмотра информации", size=15)])
             )
         
+        info_page = []
+        
         for value in self.data:
-            if app_state.activeFileHome in value['name']:
-                for audio in value['audio']:
+            if app_state.activeFilesHome[-1] in value['name']:
+                for state in value[app_state.infoMode]:
+                    if app_state.infoMode == 'audio':
+                        textField = ft.Column([
+                            ft.Row([
+                                ft.Text("Описание (имя) аудиодорожки:", size=15),
+                                ft.TextField(
+                                    hint_text="Введите имя аудиодорожки",
+                                    value=state['title'],  # Устанавливаем значение здесь
+                                    width=300,
+                                    height=40
+                                )
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Индекс в контейнере:", size=15),
+                                ft.Text(f"{state['index']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Язык аудиодорожки:", size=15),
+                                ft.Text(f"{state['language']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Кодек аудиодорожки:", size=15),
+                                ft.Text(f"{state['codec_name']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Количество каналов:", size=15),
+                                ft.Text(f"{state['channels']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Битрейт:", size=15),
+                                ft.Text(f"{state['bit_rate']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Источник:", size=15),
+                                ft.Text(f"{state['path'] if state['path'] else '[в составе контейнера]'}", size=15, weight='bold'),
+                            ]),
+                            ft.Divider(height=1)
+                        ])
+
+
+                    elif app_state.infoMode == 'video':
+                        textField = ft.Column([
+                            ft.Row([
+                                ft.Text(f"Разрешение сторон:", size=15),
+                                ft.Text(f"{state['width']}x{state['height']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Тип цветопередачи:", size=15),
+                                ft.Text(f"{state['pix_fmt']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Профиль:", size=15),
+                                ft.Text(f"{state['profile']}", size=15, weight='bold'),
+                            ]),
+                            ft.Divider(height=1)
+                        ])
+
                     
-                    textField = ft.Row([
-                        ft.Text("Описание (имя) аудиодорожки:", size=15),
-                        ft.TextField(
-                            hint_text="Введите имя аудиодорожки",
-                            value=audio['title'],  # Устанавливаем значение здесь
-                            width=300
-                        )
-                    ])
-                    self.info_page.append(textField)
+                    elif app_state.infoMode == 'subtitle':
+                        textField = ft.Column([
+                            ft.Row([
+                                ft.Text("Описание (имя) субтитров:", size=15),
+                                ft.TextField(
+                                    hint_text="Введите имя субтитров",
+                                    value=state['title'],  # Устанавливаем значение здесь
+                                    width=300,
+                                    height=40
+                                )
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Язык субтитров:", size=15),
+                                ft.Text(f"{state['language']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Формат:", size=15),
+                                ft.Text(f"{state['format']}", size=15, weight='bold'),
+                            ]),
+                            ft.Row([
+                                ft.Text(f"Источник:", size=15),
+                                ft.Text(f"{state['path'] if state['path'] else '[в составе контейнера]'}", size=15, weight='bold'),
+                            ]),
+                            ft.Divider(height=1)
+                        ])
+
+                    info_page.append(textField)
 
         return ft.Container(
-            content=ft.Column(self.info_page)
+            content=ft.Column(info_page)
         )
 
 
@@ -136,7 +226,7 @@ def navigation():
             ),
             ft.ElevatedButton(
                 "Конвертер", 
-                on_click=lambda e: app_state.new_page(rout.multipage(2)),
+                on_click=lambda e: app_state.new_page(rout.Page_setting_converter),
             ),
             ft.ElevatedButton(
                 "Манифест",
