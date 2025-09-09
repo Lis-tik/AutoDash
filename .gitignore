@@ -1,4 +1,5 @@
 test.py
 options/
 mpd_test/
-**/__pycache__/
+__pycache__/
+*.py[cod]

@@ -14,6 +14,8 @@ class ContentCheckbox(ft.Checkbox):
         self.value = False
         
     def get_data_file(self, e):
+        if self.label in app_state.activeFilesHome:
+            return
         app_state.activeFilesHome.append(self.label) 
         app_state.new_page(rout.Page_Home)
         
