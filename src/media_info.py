@@ -1,5 +1,6 @@
 import ffmpeg
 import os
+from App.storage import app_state
 
 class Info():
     def __init__(self):
@@ -36,6 +37,11 @@ class Info():
                     del self.info_main_lib[self.global_path][x][correct[0]][int(correct[1])]
         else:
             self.info_main_lib[self.global_path][mode][correct[0]][int(correct[1])][correct[2]] = correct[3]
+
+
+    def edit_workspace_app(self):
+        return
+
                 
 
         
